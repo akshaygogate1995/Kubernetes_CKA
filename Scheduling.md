@@ -18,14 +18,23 @@ To check if scheduler is present do -> k get pods --namespace kube-system
 if scheduler, is not present, container will always be in pending state in that case you have to add nodeName field.
 
 ---
+
 apiVersion: v1
+
 kind: Pod
+
 metadata: 
+
   name: nginx
+  
 spec:
+
   nodeName: node-1
+  
   containers: 
+  
   - image: nginx
+  - 
     name: nginx
 
 Above is the example of how to manually schedule.
