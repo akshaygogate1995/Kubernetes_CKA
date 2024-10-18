@@ -20,7 +20,9 @@ if scheduler, is not present, container will always be in pending state in that 
 ![image](https://github.com/user-attachments/assets/a0da8024-332d-46bb-8df0-c2f677fee3a7)
 
 Above is the example of how to manually schedule.
+
 k replace --force -f nginx.yaml    -> This will delete and reapply in single command
+
 k get pods --watch    (To watch it continously)
 
 You cannot move running pod from one node to other. You have to delete it and recreate.
