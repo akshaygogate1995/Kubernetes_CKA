@@ -17,25 +17,7 @@ How scheduler works in the backend?
 To check if scheduler is present do -> k get pods --namespace kube-system
 if scheduler, is not present, container will always be in pending state in that case you have to add nodeName field.
 
----
-
-apiVersion: v1
-
-kind: Pod
-
-metadata: 
-
-  name: nginx
-  
-spec:
-
-  nodeName: node-1
-  
-  containers: 
-  
-  - image: nginx
-  - 
-    name: nginx
+![image](https://github.com/user-attachments/assets/a0da8024-332d-46bb-8df0-c2f677fee3a7)
 
 Above is the example of how to manually schedule.
 k replace --force -f nginx.yaml    -> This will delete and reapply in single command
