@@ -122,6 +122,21 @@ Kubectl taint nodes node1 app=blue:NoSchedule
 
 Important - Taint and Tolerations does not tell the pod to go to a particular node. Instead, it tells the node to only accept pods with certain tolerations. If your requirement is to restrict a pod to a certain nodes, it is achieved through another concept called as node affinity.
 
+Scheduler does not schedule any pods on the master node. Why is that? -> When the kubernetes cluster is first set up, a taint is set on the master node automatically that prevents any pods from being scheduled on this node. 
+
+kubectl describe node kubemaster | grep Taint   ( Will show taint on master node) 
+
+k taint nodes node01 spray=mortein:NoSchedule
+
+kubectl run pod-01 --image=nginx
+
+kubectl run my-pod --image=nginx --dry-run=client -o yaml > my-pod.yaml
+
+
+
+
+
+
 
 
 
