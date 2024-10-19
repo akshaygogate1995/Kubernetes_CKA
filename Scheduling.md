@@ -120,6 +120,7 @@ Kubectl taint nodes node1 app=blue:NoSchedule
 
 ![image](https://github.com/user-attachments/assets/c5727a37-d94f-46e1-8c50-62f311534366)
 
+Important - Taint and Tolerations does not tell the pod to go to a particular node. Instead, it tells the node to only accept pods with certain tolerations. If your requirement is to restrict a pod to a certain nodes, it is achieved through another concept called as node affinity.
 
 
 
