@@ -132,6 +132,13 @@ kubectl run pod-01 --image=nginx
 
 kubectl run my-pod --image=nginx --dry-run=client -o yaml > my-pod.yaml
 
+![image](https://github.com/user-attachments/assets/f8905dec-2026-436c-a892-238fdf33962c)
+
+To remove taint -> kubectl taint nodes controlplane node-role.kubernetes.io/control-plane:NoSchedule-     (Its minus sign at end)
+
+
+
+
 
 
 
