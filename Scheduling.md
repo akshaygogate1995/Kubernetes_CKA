@@ -70,6 +70,57 @@ While labels and Selectors are used to group and select objects, annotations are
 
 # Taints and Tolerations
 
+## Taints
+
+This is about Pod to Node relationship, and how you can restrict what pods are placed on what nodes. The concept of taints and tolerations, can be a bit confusing. 
+
+For eg -> Person is a node and bug is a pod. Taints and Tolerations has nothing to do with security or intusion on the cluster. It is actually used to set restrictions on what pods can be scheduled on a node.
+
+If there are three worker nodes - node a, b, c and we also have set of pods 1, 2, 3, 4. When Pods are created, kubernetes scheduler tries to place these pods on the available worker nodes. As of now there are 
+no restrictions or limitations. That is why scheduler places pods across all of the nodes to balance them out equally.
+
+Now, let us assume, we have dedicated resources on node A for particular use case or application. So we would like only those pods that belong to this application to be placed on Node A. First, we prevent all 
+pods from being placed on the node by placing a taint on that node. for eg Taint=blue by doing this no unwanted pods are going to be placed on this node. Other half of job is to enable certain pods to be placed 
+on Node A. 
+
+For this, we must specify which pods are tolerant to this particular taint.Add toleration to any Pod you want to.
+
+kubectl taint nodes node-name key=value:taint-effect
+
+For eg - If you would like to dedicate the node to pods in application blue, then the key value pair would be app=blue
+
+What happens to pods that Do Not Tolerate this taint? -> There are three taint effects such as 
+
+No Schedule - which means pods will not be scheduled on the node.
+
+Prefer No Schedule - Which means the system will try to avoid placing a pod on the node, but that is not guarenteed.
+
+No Execute - Which means new pods will node be scheduled on the node and existing pods on the node, if any, will be evicted if they do not tolerate the taint. These pods may have been scheduled on the node
+before the taint was applied to the node.
+
+kubectl taint nodes node1 app=blue:NoSchedule
+
+In Kubernetes, taints and tolerations are used to control which nodes can accept which pods. Taints are applied to nodes, and tolerations are applied to pods. Here are the three taint effects:
+
+NoSchedule: This effect ensures that no new pods that do not tolerate the taint will be scheduled on the node. However, existing pods on the node are not affected.
+
+PreferNoSchedule: This is a softer version where the system tries to avoid placing a pod that does not tolerate the taint on the node, but it is not a strict rule.
+
+NoExecute: This effect is the strongest. It evicts any existing pods that do not tolerate the taint and prevents any new pods that do not tolerate the taint from being scheduled on the node.
+
+When a pod gets evicted from a node due to a taint with the NoExecute effect, it means the pod is forcibly removed from that node. The Kubernetes scheduler will then try to find another suitable node for the pod to run on, provided there is a node that meets the pod’s requirements and tolerates its taints.
+
+If no suitable node is found, the pod will remain in a pending state until a suitable node becomes available. This ensures that the pod can eventually be scheduled and run, but it might experience some downtime during the eviction and rescheduling process.
+
+## Tolerations
+
+To add tolerations to any pod you need to add as it is shown in below image. It should be under spec section.
+
+Kubectl taint nodes node1 app=blue:NoSchedule
+
+![image](https://github.com/user-attachments/assets/c5727a37-d94f-46e1-8c50-62f311534366)
+
+
 
 
 
