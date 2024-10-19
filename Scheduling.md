@@ -39,6 +39,57 @@ Binding: Once a node is selected, the scheduler binds the pod to that node by up
 
 Plugins and Extensibility: Kubernetes also supports a scheduling framework that allows for custom plugins. These plugins can be used to extend the scheduler’s functionality, enabling more complex scheduling behaviors and policies.
 
+# Labels and Selectors
+
+Labels and selectords are standard method to group things together.
+
+Labels are properties attached to each item. So, you add properties to each item for their class, kind and color. Selectors help you filter these items. When you say class = Mammal & Color = Green, it will filter
+and give you result. 
+
+We have created lot of different types of object in kubernetes like pods, services, replica sets, deployments, etc. Overtime you could end up having 100s or 1000s of objects in the cluster. Then you need a way to
+filter and view different object by categories such as to group objects by their type, application, functionality, etc.
+
+For each object, attach labels as per your needs, like app, function, etc. Then while selecting, specify condition to filter object. 
+
+In Pod definition file, under metadata create a section called labels.
+
+Command -> kubectl get pods --selector app=App1
+
+Command -> Kubectl get all --selector env=prod
+
+Command -> kubectl get all --selector env=prod,bu=finance,tier=frontend    (This is for multiple labels)
+
+![image](https://github.com/user-attachments/assets/4b243f91-2660-4ac3-91d5-0f4fbe477684)
+
+In above image, matchLabels under spec should match with labels under template section.
+
+
+# Annotations
+
+While labels and Selectors are used to group and select objects, annotations are used to record other details for informatory purpose. For eg, tool details like name, version, contact details ,email id, etc.
+
+# Taints and Tolerations
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
