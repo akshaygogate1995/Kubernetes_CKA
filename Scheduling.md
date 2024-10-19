@@ -1,7 +1,7 @@
 # Manual Scheduling
 
 What you do when you do not have scheduler in cluster?
--> You probably dont want to rely on built-in scheduler, and instead scheduler the pod yourself.
+-> You probably dont want to rely on built-in scheduler, and instead schedule the pod yourself.
 
 How scheduler works in the backend?
 -> Every pod has a field called nodeName, which is by default not set. We dont typically specify this field, when we create the pod manifest file, infact kubernetes adds it automatically.
@@ -26,6 +26,22 @@ k replace --force -f nginx.yaml    -> This will delete and reapply in single com
 k get pods --watch    (To watch it continously)
 
 You cannot move running pod from one node to other. You have to delete it and recreate.
+
+The Kubernetes scheduler is a crucial component of the Kubernetes control plane. Its primary role is to assign newly created pods to nodes within the cluster. Here’s a high-level overview of how it works:
+
+Queueing: When a new pod is created, it is added to a scheduling queue. The scheduler continuously monitors this queue for pods that need to be assigned to nodes.
+
+Filtering: The scheduler first filters out nodes that do not meet the pod’s requirements. This includes checking for resource availability (CPU, memory), node taints and tolerations, and other constraints specified in the pod’s configuration.
+
+Scoring: After filtering, the scheduler scores the remaining feasible nodes. This scoring is based on various factors such as resource utilization, affinity/anti-affinity rules, and data locality. The node with the highest score is selected.
+
+Binding: Once a node is selected, the scheduler binds the pod to that node by updating the pod’s specification in the Kubernetes API server. This process is known as binding.
+
+Plugins and Extensibility: Kubernetes also supports a scheduling framework that allows for custom plugins. These plugins can be used to extend the scheduler’s functionality, enabling more complex scheduling behaviors and policies.
+
+
+
+
 
 
 
