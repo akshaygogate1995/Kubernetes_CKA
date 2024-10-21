@@ -136,6 +136,186 @@ kubectl run my-pod --image=nginx --dry-run=client -o yaml > my-pod.yaml
 
 To remove taint -> kubectl taint nodes controlplane node-role.kubernetes.io/control-plane:NoSchedule-     (Its minus sign at end)
 
+# Node Selectors
+
+If you have three node cluster, out of which two have lower hardware resources, one of them is a larger node configured with higher resources. You have different kind of workload running in the cluster. You would like to
+dedicate the data processing workloads that require higher horsepower to the larger node as that is the only node that will not run out of resource in case the job demands extra resources. 
+
+However, in the current default setup, any pods can go to any nodes. So, Po C for eg can end up on nodes two or three, which is not desired. To solve this, we can set a limitation on the pods, so that they only run on 
+particular nodes.
+
+There are two ways to do this - 
+
+1. Using Node Selectors, which is the simple and easier method. For this, we look at the pod definition file we created earlier. This file has simple definition to create a pod with a data processing image. To limit this
+   pod to run on the larger node, we add a new property called node selector to the spec section. specify the size as Large. But from where did this size Large come from and how does kubernetes know which is large node?
+
+   --------
+   
+   apiVersion:
+   
+   kind: Pod
+
+   metadata:
+
+     name: myapp-pod
+
+   spec:
+
+     containers:
+     
+     - name: data-processor
+     
+       image: data-processor
+     
+     nodeSelector:
+
+       size: Large
+   
+    ------------------
+
+The key value pair of size and large are in fact labels assigned to the nodes. The scheduler uses these labels to match and identify the right node to place pods on. 
+
+To use labels in a node selector you must have first labeled your nodes prior to creating this pod. 
+
+How to label a node?
+
+kubectl label nodes node-01 size=Large
+
+Node selectors served our purpose, but it has limitations. We used a single label and selector to achieve our goal here. But what if our requirement is much more complex?
+
+For eg - if we want to say place a pod on a large or medium node, or something like place the pod on any node that are not small. You cannot achieve this using Node Selectors. 
+
+For this, node affinity and anit-affinity features were introduced
+
+# Node Affinity
+
+The primary purpose of node affinity feature is to ensure that pods are hosted on particular nodes, for eg to ensure that large data processing pod ends up on node-01.
+
+You cannot use advanced expressions like Or / Not with Node Selectors.
+
+The node affinity feature, provides us with advanced capabilities to limit pod placement on specific nodes. With great power comes great complexity, it looks like
+
+-------------------------------------------------
+
+affinity:
+
+  nodeAffinity:
+
+    requiredDuringSchedulingIgnoreDuringExecution:
+
+      nodeSelectorTerms:
+
+      - matchExpressions:
+
+        - key: size
+
+          operator: In       (NotIn for small can also be one use case)      (Exist - will check if label size exists)
+
+          values:
+
+          - Large
+
+          - Medium   (You can add remove as per need)
+
+------------------------------------------------------
+
+WHat if node affinity could not match a node with a given expression?
+
+In case - where there are no nodes with the label called size.
+
+Say we had the labels and the pods are scheduled. What if someone changes the label on the node at the future point in time?
+
+Will the pod continue to stay on the node?
+
+The Type of node affinity defines the behavior of the scheduler with respect to node affinity and the stages in the life cycle of the pod.
+
+------------------------------------------------------------
+
+There are currently two types of node affinity available -
+
+Available -
+
+requiredDuringSchedulingIgnoredDuringExecution
+
+preferredDuringSchedulingIgnoredDuringExecution
+
+Planned -
+
+requiredDuringSchedulingRequiredDuringExecution
+
+----------------------------------------------------------
+
+There are two states in the lifecycle of a Pod, when considering node affinity, during scheduling and during execution.
+
+During Scheduling is the state where a pod does not exist and si created for first time. We have no doubt that when a pod is first created, the affinity rules specified are considered to place the pods on right nodes.
+
+Now, what if nodes with matching labels are not available? For eg - if we forgot to label the node as Large. That is where type of node affinity use comes into play. 
+
+If you choose requiredDuringScheduling, the scheduler will mandate that the pod be placed on a node with a given affinity rule. If it cannot find one, the pod will not be scheduled. This tpe will be used in cases, where the placement of the pod is crucial. If a matching node does not exist, the pod will not be scheduled. 
+
+But lets say, if pod placement is less important, than running the workload itself. In that case, you could set it to preferredDuringScheduling and in cases where a matching node is not found, the scheduler will simply ignore node affinity rules and place the pod on any available node. 
+
+This is a way of telling scheduler, you tried finding matching, if you dont find anything just place it anywhere. 
+
+What if admin removes the label on node which has Large as a label, what will happen to the pod running on the node?
+
+As you can see, there are two types of node affinity available todays has this value set to ignored, which means pods will continue to run and any changes in node affinity will not impact them once they are scheduled. 
+
+The new types expected in future, only have a difference in the during execution phase. In this case, if label is removed from node, pod will also be deleted.
+
+to check labels on nodes  -> k describe nodes node-01
+
+to add labels -> k label nodes node-01 color=blue
+
+kubectl create deployment blue --image=nginx --replicas=3
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
 
 
 
