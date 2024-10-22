@@ -269,6 +269,200 @@ to add labels -> k label nodes node-01 color=blue
 
 kubectl create deployment blue --image=nginx --replicas=3
 
+# Node Affinity vs Taints & Tolerations
+
+For eg - If we have three pods Red, Green & Blue. Also, we have three nodes Red, Green & Blue. We want Red to go in Red Node and likewise. We dont want any other pods to be placed on our nodes and also I dont want to place our pods to any nodes instead in their own color node. 
+
+Using Taints & Tolerations - We apply a taint to the nodes marking them with their colors blue, red and green and, we then set a toleration on the Pods to tolerate the respective colors. When the pods are now created, the nodes ensure they only accept the pods with the right toleration. So, green pods ends up on green node and likewise for other colors. 
+
+However, taints and tolerations does not guarentee that the pods will only prefer these nodes. So, Red pod can be placed on node which has no taint and tolerations set. This is not desired. 
+
+What if we use node affinity for this problem, with node affinity, we first label the nodes with their respective colors blue, red and green. We then set node selectors on the pods, to tie the pods to nodes. As such, the pods end up on the right nodes. However, that does not guarentee, that other pods are not placed on these nodes. In this case, there is a chance that one of the other pods may end up on our nodes. This is not something we desire.
+
+As such a combination of taints and tolerations, and node affinity rules can be used together to completely dedicate nodes for specific pods. 
+
+We first use taints and tolerations to prevent other pods from being placed on our nodes, and then we use node affinity to prevent our pods from being placed on their nodes. 
+
+# Resource Requirements and Limits
+
+Each node has a set of CPU and memory resources available. Now every pod requires a set of resources to run. For eg if pod required 2 CPU and 1 memory unit. Whenever pod is placed on a node, it consumes the resources available on that node. 
+
+It is kube scheduler which decides which node a pod goes to. Scheduler takes into consideration, the amount of resources required by a pod and those available on the nodes and idenitifies the best node to place a pod on. 
+
+If nodes have no sufficient resources available, the scheduler avoids placing the pods on those nodes and instead places the pod on one where sufficient resources are available. If there is no sufficent resources available on any nodes, then scheduler holds back scheduling the pod and you will see pod is in a pending state. If you look at the events, using kubectl describe pod command, you will see reason there is an insufficient CPU.
+
+What are the blocks and what their values in resource requirement of each pod. Now you can specify the amount of CPU and memory required for a pod when creating one. For eg it could be one CPU and one gibibyte of memory and this is known as resource request for a container. So, minimum amount of CPU and memory requested by the container. 
+
+So, when the scheduler tries to place the pod on a node, it uses these numbers to identify a node which has sufficient amount of resources available. So, to do this in the sample pod-definition file, you need to add a section called resources under which add requests and specify the new values for memory and CPU usage.
+
+----------------------------------------------------------
+
+spec:
+
+   containers:
+
+   - name: sample-webapp
+     
+     image: sample-webapp
+
+     ports:
+
+       - containerPort: 8080
+    
+     resources:
+
+       requests:
+
+         memory: "4Gi"
+
+         cpu = 2
+
+---------------------------------------------------
+
+When a scheduler get a request to place this pod, it looks for a node that has this amount of resources available. When pods gets placed, it gets a guarenteed amount of resources available for it.
+
+1 CPU is equivalent to - 1 AWS vCPU, 1 GCP core, 1 Azure Core, 1 HyperThread.
+
+--------------------------------------------------
+
+limits:
+
+  memory: "2Gi"
+
+  cpu: 2 
+
+  ------------------------------
+
+  What happens when a pod tries to exceed resources beyond its specified limit. In case of CPU, the system throttles the CPU so that it does not go beyond the specified limit.
+
+  A container cannot use more CPU resources that its limit. However, this is not the case with memory. A container can use more memory resources that its limit. So if a pod tries to consume more memory than its limit constantly, the pod will be terminated an you will see that the pod terminated with an OOM error in the logs. OOM means out of memory kill. 
+
+  By default, Kubernetes does not have a CPU or memory request or limit set. So this means that any pod can consume as much resources as required on any node and suffocate other pods or processes that are running on the node of resources. 
+
+How CPU requests and limits work -
+
+No Requests - No Limits
+
+If there are two pods competing for CPU resources on the cluster, With Pod means container within pod. Without resource or limit set, 1 pod can consume all the CPU resource on the node and prevent the second pod of required resources. Which is not ideal. 
+
+No Requests - Limits are Set ( Requests = Limits )
+
+In this case, kubernetes automatically sets requests to the same as limits. 
+
+Request Set - Limits Set
+
+In this scenario, if Pod A uses 3 Vcpu's but needs more for some reason he can't use CPU allocated for Pod B.
+
+Request Set - No Limits   ( Most Ideal SetUp )
+
+Because requests are set each pod is guarenteed 1 Vcpu, however because limits are not set when available any pod can consume as many CPU cycles as available. Make sure all the pods have some requests set.
+
+It works same for memory requests as well.
+
+Bu default, kubernetes does not have resource requests or limits configured for pods. But then how do we ensure that every pod created has some default set. Now this is possible using limitrange. This is applicable on namespace level. 
+
+LimitRange (limit-range-cpu.yaml)
+
+apiVersion: v1
+
+kind: LimitRange
+
+metadata:
+
+  name: cpu-resource-constraint
+
+spec:
+
+  limits:
+
+  - default:
+
+      cpu: 500m
+
+    defaultRequest:
+
+      cpu: 500m
+
+    max:
+
+      cpu: "1"
+
+    min:
+
+      cpu: 100m
+
+    type: container
+
+
+    --------------------------------------------------------------------------- (do memory instead of cpu)
+
+    It will affect only newer pods and not older pods which are already created.
+
+    Is there any way to restrict the total amount of resources that can be consumed by applications deployed in a kubernetes cluster?
+
+    -> Create Quoatas at namespace level ( Resource Quotas)
+
+    So, resource quota is a namespace level object that can be created to set hard limits for requests and limits.
+
+    Resource-Quota.yaml
+
+    ----------------------------------------------------
+
+    apiVersion: v1
+
+    kind: ResourceQuota
+
+    metadata:
+
+      name: my-resource-quota
+
+    spec:
+
+      hard:
+
+        requests.cpu: 4
+
+        requests.memory: 4Gi
+
+        limits.cpu: 10
+
+        limits.memory: 10Gi
+
+    --------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
