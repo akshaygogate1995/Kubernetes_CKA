@@ -430,6 +430,14 @@ spec:
 
     --------------------------------------------------------
 
+    # Daemon Set
+
+    Daemon Set are like Replica set, as in it helps you deploy multiple instances of pods but it runs one copy of your pod on each node in your cluster. Whenever a new node is added to cluster, a replica of pod is automatically added to that node and when node is removed, the pod is automatically removed. The Daemon set ensures one copy of the pod is always present in all nodes in the cluster.
+
+What are some use case of DaemonSet?
+
+You can deploy monitoring agent or log collector on each of your node in cluster. Daemon set is perfect for this. Kube-proxy is a good example of daemonset. Another use is for networking ( weave-net ). Creating a Daemon Set is similar to the ReplicaSet creation process. It has nested pod specification under the template section and selectors to link the DaemonSet to the pods.
+
 
 
 
